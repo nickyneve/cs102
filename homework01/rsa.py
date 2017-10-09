@@ -15,14 +15,16 @@ def is_prime(n):
     """
     flag = True
     i = 2
-    while i <= math.sqrt(n) :
+    if n != 1:
+        while i <= math.sqrt(n):
             if n % i == 0:
                 flag = False
                 break
             else:
                 i += 1
+    else:
+        flag = False
     return flag
-
 
 
 def gcd(a, b):
@@ -33,8 +35,8 @@ def gcd(a, b):
     3
     >>> gcd(3, 7)
     1
-    >>>
     """
+
     while (a != 0) and (b != 0):
         if a > b:
             a %= b
@@ -42,12 +44,14 @@ def gcd(a, b):
             b %= a
     return a + b
 
-def ext_gcd(e,phi):
+
+def ext_gcd(e, phi):
     if phi == 0:
         return e, 1, 0
     else:
         d, x, y = ext_gcd(phi, e % phi)
         return d, y, x - y * (e // phi)
+    # (e*y)+ (x - y * (e // phi) ) = d
 
 
 def multiplicative_inverse(e, phi):
@@ -59,9 +63,8 @@ def multiplicative_inverse(e, phi):
     23
     """
     d = ext_gcd(e, phi)
-    res = d[l] % phi
+    res = d[1] % phi
     return res
-
 
 
 def generate_keypair(p, q):
@@ -74,7 +77,7 @@ def generate_keypair(p, q):
     n = p * q
 
     # phi = (p-1)(q-1)
-    phi = (p - 1)*(q - 1)
+    phi = (p-1)*(q-1)
 
     # Choose an integer e such that e and phi(n) are coprime
     e = random.randrange(1, phi)

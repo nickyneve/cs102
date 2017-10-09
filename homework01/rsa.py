@@ -13,17 +13,13 @@ def is_prime(n):
     >>> is_prime(8)
     False
     """
-    flag = True
-    i = 2
-    if n != 1:
-        while i <= math.sqrt(n):
-            if n % i == 0:
-                flag = False
-                break
-            else:
-                i += 1
-    else:
+    if n < 2:
         flag = False
+    else:
+        i = 2
+        while i <= math.sqrt(n) and n % i != 0:
+                i += 1
+        flag = i * i > n
     return flag
 
 
@@ -51,7 +47,6 @@ def ext_gcd(e, phi):
     else:
         d, x, y = ext_gcd(phi, e % phi)
         return d, y, x - y * (e // phi)
-    # (e*y)+ (x - y * (e // phi) ) = d
 
 
 def multiplicative_inverse(e, phi):

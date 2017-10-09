@@ -11,22 +11,25 @@ def encrypt_caesar(plaintext):
     """
     ciphertext = ''
     for i in plaintext:
-        if i in shift_plus_3:
-            ciphertext = ciphertext + shift_plus_3[i]
-        elif i >= 'a' and i <= 'z' or i >= 'A' and i <= 'Z':
-            ciphertext = ciphertext + chr(ord(i)+3)
+        if i >= 'a' and i <= 'z' or i >= 'A' and i <= 'Z':
+            if i == 'x':
+                a = 'a'
+            elif i == 'y':
+                a = 'b'
+            elif i == 'z':
+                a = 'c'
+            elif i == 'X':
+                a = 'A'
+            elif i == 'Y':
+                a = 'B'
+            elif i == 'Z':
+                a = 'C'
+            else:
+                a = chr(ord(i) + 3)
+            ciphertext = ciphertext + a
         else:
             ciphertext = ciphertext + i
     return ciphertext
-
-shift_plus_3 = {
-    'x': 'a',
-    'y': 'b',
-    'z': 'c',
-    'X': 'A',
-    'Y': 'B',
-    'Z': 'C'
-}
 
 
 def decrypt_caesar(ciphertext):
@@ -42,20 +45,22 @@ def decrypt_caesar(ciphertext):
     """
     plaintext = ''
     for i in ciphertext:
-        if i in shift_minus_3:
-            plaintext = plaintext + shift_minus_3[i]
-        elif i >= 'a' and i <= 'z' or i >= 'A' and i <= 'Z':
-            plaintext = plaintext + chr(ord(i) - 3)
+        if i >= 'a' and i <= 'z' or i >= 'A' and i <= 'Z':
+            if i == 'a':
+                a = 'x'
+            elif i == 'b':
+                a = 'y'
+            elif i == 'c':
+                a = 'z'
+            elif i == 'A':
+                a = 'X'
+            elif i == 'B':
+                a = 'Y'
+            elif i == 'C':
+                a = 'Z'
+            else:
+                a = chr(ord(i) - 3)
+            plaintext = plaintext + a
         else:
             plaintext = plaintext + i
     return plaintext
-
-
-shift_minus_3 = {
-    'a': 'x',
-    'b': 'y',
-    'c': 'z',
-    'A': 'X',
-    'B': 'Y',
-    'C': 'Z'
-}

@@ -13,7 +13,10 @@ def encrypt_vigenere(plaintext, keyword):
     ciphertext = ''
     n = 0
     for i in plaintext:
-        ciphertext = ciphertext+chr(ord(i) + shift_for_encrypt(keyword, n, i))
+        a = ord(keyword[n % len(keyword)]) - ord('a')
+        if (ord(i.lower()) - ord('a')) > (26 - a):
+            a = a - 26
+        ciphertext = ciphertext+chr(ord(i) + a)
         n += 1
     return ciphertext
 
@@ -41,14 +44,9 @@ def decrypt_vigenere(ciphertext, keyword):
     plaintext = ''
     n = 0
     for i in ciphertext:
-        plaintext = plaintext + chr(ord(i) - shift_for_decrypt(keyword, n, i))
+        a = ord(keyword[n % len(keyword)]) - ord('a')
+        if (ord(i.lower()) - ord('a')-a) < 0:
+            a = a - 26
+        plaintext = plaintext + chr(ord(i) - a)
         n += 1
     return plaintext
-
-
-def shift_for_decrypt(keyword, n, i):
-    a = ord(keyword[n % len(keyword)]) - ord('a')
-    i = i.lower()
-    if (ord(i) - ord('a') - a) < 0:
-        a = a - 26
-    return a

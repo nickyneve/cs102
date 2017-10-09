@@ -21,14 +21,6 @@ def encrypt_vigenere(plaintext, keyword):
     return ciphertext
 
 
-def shift_for_encrypt(keyword, n, i):
-    a = ord(keyword[n % len(keyword)])-ord('a')
-    i = i.lower()
-    if (ord(i) - ord('a')) > (26 - a):
-        a = a - 26
-    return a
-
-
 def decrypt_vigenere(ciphertext, keyword):
     """
     Decrypts a ciphertext using a Vigenere cipher.

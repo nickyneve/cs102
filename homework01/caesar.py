@@ -59,7 +59,3 @@ shift_minus_3 = {
     'B': 'Y',
     'C': 'Z'
 }
-
-print(encrypt_caesar("python"))
-print(encrypt_caesar("marina, abc xyz"))
-print(decrypt_caesar("pdulqd, def abc"))

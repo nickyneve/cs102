@@ -52,6 +52,3 @@ def shift_for_decrypt(keyword, n, i):
     if (ord(i) - ord('a') - a) < 0:
         a = a - 26
     return a
-
-
-print(decrypt_vigenere("LXFOPVEFRNHR", "LEMON"))

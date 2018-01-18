@@ -1,29 +1,4 @@
-import math
 import random
-
-
-def group(numbers, groups):
-    numbers_clone = []
-    a = len(numbers)
-    if a == groups:
-        for number in numbers:
-            numbers_clone.append([number])
-    if a > groups:
-        b = math.ceil(a / groups)
-        for i in range(groups - 1):
-            numbers_clone.append(numbers[: b])
-            del numbers[: b]
-        numbers_clone.append(numbers[:])
-    if a < groups:
-        for i in range(a // 2):
-            numbers_clone.append(numbers[: 2])
-            del numbers[: 2]
-        if numbers:
-            numbers_clone.append(numbers)
-            groups -= 1
-        for i in range(groups - (a // 2)):
-            numbers_clone.append([])
-    return numbers_clone
 
 
 def read_sudoku(filename):
@@ -33,113 +8,156 @@ def read_sudoku(filename):
     return grid
 
 
-def get_row(values, pos):
-    return(values[pos[0]])
-
-
-def get_col(values, pos):
-    numb = []
-    for i in range(9):
-        numb.append(values[i][pos[1]])
-    return numb
-
-
-def get_block(values, pos):
-    numb = []
-    a, b = pos[0] // 3, pos[1] // 3
-    for i in range(3):
-        numb.append(values[a*3 + i][b*3:b*3+3])
-    return numb
-
-
-def display(value):
-    for i in range(9):
-        print(value[i][0], value[i][1], value[i][2], "|",
-              value[i][3], value[i][4], value[i][5], "|",
-              value[i][6], value[i][7], value[i][8])
-        if(i == 2) or (i == 5):
-            print("------+-------+------")
+def display(values):
+    """Вывод Судоку """
+    width = 2
+    line = '+'.join(['-' * (width * 3)] * 3)
+    for row in range(9):
+        print(''.join(values[row][col].center(width)
+              + ('|' if str(col) in '25' else '') for col in range(9)))
+        if str(row) in '25':
+            print(line)
     print()
 
 
-def find_empos(grid):
-    for i in range(len(grid)):
-        if (grid[i].count(".") != 0):
-            return (i, grid[i].index("."))
-    return ()
+def group(values, n):
+    """
+    Сгруппировать значения values в список, состоящий из списков по n элементов
+    >>> group([1,2,3,4], 2)
+    [[1, 2], [3, 4]]
+    >>> group([1,2,3,4,5,6,7,8,9], 3)
+    [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    """
+    return [values[i * n:(i + 1) * n] for i in range(n)]
 
 
-def find_posval(grid, pos):
-    numb = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    row = get_row(grid, pos)
-    col = get_col(grid, pos)
-    block = get_block(grid, pos)
-    for i in range(1, 10):
-        if str(i) in row:
-            numb.remove(i)
-            continue
-        if str(i) in col:
-            numb.remove(i)
-            continue
-        for k in range(3):
-            if str(i) in block[k]:
-                numb.remove(i)
-    return numb
+def get_row(values, pos):
+    """ Возвращает все значения для номера строки, указанной в pos
+    >>> get_row([['1', '2', '.'], ['4', '5', '6'], ['7', '8', '9']], (0, 0))
+    ['1', '2', '.']
+    >>> get_row([['1', '2', '3'], ['4', '.', '6'], ['7', '8', '9']], (1, 0))
+    ['4', '.', '6']
+    >>> get_row([['1', '2', '3'], ['4', '5', '6'], ['.', '8', '9']], (2, 0))
+    ['.', '8', '9']
+    """
+    return values[pos[0]]
 
 
-flag = False
+def get_col(values, pos):
+    """ Возвращает все значения для номера столбца, указанного в pos
+    >>> get_col([['1', '2', '.'], ['4', '5', '6'], ['7', '8', '9']], (0, 0))
+    ['1', '4', '7']
+    >>> get_col([['1', '2', '3'], ['4', '.', '6'], ['7', '8', '9']], (0, 1))
+    ['2', '.', '8']
+    >>> get_col([['1', '2', '3'], ['4', '5', '6'], ['.', '8', '9']], (0, 2))
+    ['3', '6', '9']
+    """
+    B = []
+    for i in range(len(A)):
+        B.append(A[i][pos[1]])
+    return B
+
+
+def get_block(values, pos):
+    """ Возвращает все значения из квадрата, в который попадает позиция pos
+    >>> grid = read_sudoku('puzzle1.txt')
+    >>> get_block(grid, (0, 1))
+    ['5', '3', '.', '6', '.', '.', '.', '9', '8']
+    >>> get_block(grid, (4, 7))
+    ['.', '.', '3', '.', '.', '1', '.', '.', '6']
+    >>> get_block(grid, (8, 8))
+    ['2', '8', '.', '.', '.', '5', '.', '7', '9']
+    """
+    if pos[0] < 4:
+        return (A[(pos[1] - 1) // 3])
+    elif pos[0] < 7:
+        return (A[3 + ((pos[1] - 1) // 3)])
+    elif pos[0] < 10:
+        return (A[6 + ((pos[1] - 1) // 3)])
 
 
 def solve(grid):
-    b = find_empos(grid)
-    if b == ():
+    position = find_empty_positions(grid)
+    if position == (-1, -1):
         return grid
+
+    values = find_possible_values(grid, position)
+    n = len(values)
+    for i in range(n):
+        elem = random.choice(values)
+        grid[position[0]][position[1]] = elem
+        solution = solve(grid)
+        if solution is not None:
+            return solution
+    grid[position[0]][position[1]] = '.'
+    return None
+
+
+def find_empty_positions(grid):
+    """ Найти первую свободную позицию в пазле
+    >>> find_empty_positions([['1', '2', '.'],['4', '5', '6'],['7', '8', '9']])
+    (0, 2)
+    >>> find_empty_positions([['1', '2', '3'],['4', '.', '6'],['7', '8', '9']])
+    (1, 1)
+    >>> find_empty_positions([['1', '2', '3'],['4', '5', '6'],['.', '8', '9']])
+    (2, 0)
+    """
+    for i in range(len(grid)):
+        for j in range(len(grid[i])):
+            if A[i][j] == '.':
+                return i, j
+
+
+def find_possible_values(grid, pos):
+    """ Вернуть множество всех возможных значения для указанной позиции
+    >>> grid = read_sudoku('puzzles/puzzle1.txt')
+    >>> values = find_possible_values(grid, (0,2))
+    >>> set(values) == {'1', '2', '4'}
+    True
+    >>> values = find_possible_values(grid, (4,7))
+    >>> set(values) == {'2', '5', '9'}
+    True
+    """
+    digits = {1, 2, 3, 4, 5, 6, 7, 8, 9}
+    row = set(get_row(grid, pos))
+    col = set(get_col(grid, pos))
+    block = set(get_block(grid, pos))
+    return list(digits - row - col - block)
+
+
+def check_solution(solution):
+    """ Если решение solution верно, то вернуть True,
+    в противном случае False """
+    digits = {1, 2, 3, 4, 5, 6, 7, 8, 9}
+    k = 0
+    for i in range(9):
+        for j in range(9):
+            row = set(get_row(solution, [i][j]))
+            col = set(get_col(solution, [i][j]))
+            block = set(get_block(solution, [i][j]))
+            if row == col & col == block & block == digits:
+                k += 1
+    if k == 81:
+        return True
     else:
-        a = find_posval(grid, b)
-        if a == []:
-            return None
-        for i in a:
-            grid[b[0]][b[1]] = str(i)
-            s = solve(grid)
-            if s is not None:
-                return grid
-    grid[b[0]][b[1]] = "."
+        return False
 
 
-def check_solution(grid):
-    et = set([str(i) for i in range(1,10)])
-    for j in range(9):
-        row = set(get_row(grid, (j, 0)))
-        col = set(get_col(grid, (0, j)))
-        if row != et:
-            return False
-        if col != et:
-            return False
-    for j in range(3):
-        for k in range(3):
-            block = set(get_block(grid,(j*3, k*3))[0] + get_block(grid,(j*3, k*3))[1] + get_block(grid,(j*3, k*3))[2])
-            if block != et:
-                return False
-    return True
- 
+def generate_sudoku(N):
+    grid = [['.' for i in range(9)] for i in range(9)]
+    grid = solve(grid)
 
-def dele(grid,n):
-    i = 81
-    while i != n:
-        x = random.randrange(9)
-        y = random.randrange(9)
-        if grid[x][y] != ".":
-            grid[x][y] = "."
-            i -= 1
+    places = [(i, j) for i in range(9) for j in range(9)]
+    for q in range(81 - N):
+        place = random.choice(places)
+        places.remove(place)
+        grid[place[0]][place[1]] = '.'
     return grid
 
-def generate(n):
-    a = read_sudoku("s.txt")  
-    b = [(0,0), (1,3), (3,1), (4,4), (5,7), (7,5), (2,6), (6,2), (8,8)]
-    for pair in b:
-        a[pair[0]][pair[1]]=str(random.randrange(1,10))
-    a = solve(a)
-    a = dele(a,n)
-    global flag
-    flag = False
-    return a
+if __name__ == '__main__':
+    for fname in ['puzzle1.txt', 'puzzle2.txt', 'puzzle3.txt']:
+        grid = read_sudoku(fname)
+        display(grid)
+        solution = solve(grid)
+        display(solution)
+
